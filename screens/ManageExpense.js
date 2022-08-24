@@ -1,0 +1,96 @@
+import React, { useContext, useLayoutEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import Button from "../components/UI/Button";
+import IconButton from "../components/UI/IconButton";
+import { GlobalStyles } from "../constants/styles";
+import { ExpensesContext } from "../store/expenses-context";
+
+export default function ManageExpenses({ route, navigation }) {
+	const expenseCtx = useContext(ExpensesContext);
+	const editedExpenseId = route.params?.expenseId;
+	const isEditing = !!editedExpenseId;
+
+	useLayoutEffect(() => {
+		navigation.setOptions({
+			headerTitle: isEditing ? "Edit Expense" : "Add Expense",
+		});
+	}, [navigation, isEditing]);
+
+	function deleteExpesne() {
+		expenseCtx.removeExpense(editedExpenseId);
+		navigation.goBack();
+	}
+
+	function cancelHandler() {
+		navigation.goBack();
+	}
+
+	function confirmHandler() {
+		if (isEditing) {
+			expenseCtx.updateExpense(editedExpenseId, {
+				description: "Test!!!",
+				amount: 29.99,
+				date: new Date("2022-08-31"),
+			});
+		} else {
+			expenseCtx.addExpense({
+				description: "Test",
+				amount: 100,
+				date: new Date(),
+			});
+		}
+		navigation.goBack();
+	}
+
+	return (
+		<View style={styles.container}>
+			<View style={styles.buttons}>
+				<Button style={styles.button} mode="flat" onPress={cancelHandler}>
+					Cancel
+				</Button>
+
+				<Button onPress={confirmHandler} style={styles.button}>
+					{isEditing ? "Update" : "Add"}
+				</Button>
+			</View>
+
+			{isEditing && (
+				<View style={styles.deleteContainer}>
+					<IconButton
+						icon="trash"
+						color={GlobalStyles.colors.error500}
+						size={36}
+						onPress={deleteExpesne}
+					/>
+				</View>
+			)}
+		</View>
+	);
+}
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		padding: 24,
+		backgroundColor: GlobalStyles.colors.primary800,
+	},
+
+	buttons: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+
+	button: {
+		minWidth: 120,
+		marginVertical: 8,
+	},
+
+	deleteContainer: {
+		marginTop: 16,
+		paddingTop: 8,
+		borderTopWidth: 2,
+		borderTopColor: GlobalStyles.colors.primary200,
+		alignItems: "center",
+	},
+});
