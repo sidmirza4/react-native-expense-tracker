@@ -1,44 +1,8 @@
 import { createContext, useReducer } from "react";
 
-// const DUMMY_EXPENSES = [
-// 	{
-// 		id: "e1",
-// 		description: "A pair of shoes",
-// 		amount: 59.99,
-// 		date: new Date("2021-12-19"),
-// 	},
-
-// 	{
-// 		id: "e2",
-// 		description: "A hat",
-// 		amount: 29.99,
-// 		date: new Date("2022-1-20"),
-// 	},
-
-// 	{
-// 		id: "e3",
-// 		description: "Some bananas",
-// 		amount: 1.99,
-// 		date: new Date("2022-1-21"),
-// 	},
-
-// 	{
-// 		id: "e4",
-// 		description: "A book",
-// 		amount: 10.99,
-// 		date: new Date("2022-2-19"),
-// 	},
-
-// 	{
-// 		id: "e5",
-// 		description: "Another book",
-// 		amount: 10.99,
-// 		date: new Date("2022-2-18"),
-// 	},
-// ];
-
 export const ExpensesContext = createContext({
 	expenses: [],
+	setExpenses: (expenses) => {},
 	addExpense: ({ description, amount, date }) => {},
 	removeExpense: (id) => {},
 	updateExpense: (id, { description, amount, date }) => {},
@@ -47,8 +11,12 @@ export const ExpensesContext = createContext({
 function expensesReducer(state, action) {
 	switch (action.type) {
 		case "ADD":
-			const id = new Date().toString() + Math.random().toString();
-			return [...state, { id, ...action.payload }];
+			return [...state, action.payload];
+
+		case "SET":
+			const invertedArray = action.payload.reverse();
+			return invertedArray;
+
 		case "DELETE":
 			return state.filter((expense) => expense.id !== action.id);
 		case "UPDATE":
@@ -67,6 +35,10 @@ function expensesReducer(state, action) {
 const ExpensesContextProvider = ({ children }) => {
 	const [expensesState, dispatch] = useReducer(expensesReducer, []);
 
+	const setExpenses = (expenses) => {
+		dispatch({ type: "SET", payload: expenses });
+	};
+
 	const addExpense = (expenseData) => {
 		dispatch({ type: "ADD", payload: expenseData });
 	};
@@ -83,6 +55,7 @@ const ExpensesContextProvider = ({ children }) => {
 		<ExpensesContext.Provider
 			value={{
 				expenses: expensesState,
+				setExpenses,
 				addExpense,
 				removeExpense,
 				updateExpense,
